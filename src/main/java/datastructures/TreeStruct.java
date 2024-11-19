@@ -26,6 +26,54 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  *  二叉搜索树 满足一下条件
  *  1.对于根节点，左子树中所有的节点的值<根节点的值<右子树中所有节点的值。
  *  2.任意节点的左右子树也是二叉搜索树，即同样满足条件1.
+ *
+ *  AVL树 平衡二叉搜索树 俄罗斯的数学家G.M.Adelson-Velskii 和E.M.Landis在1962年发明的一种方法
+ *  1.节点高度
+ *  2.节点平衡因子 节点左子树的高度减去节点右子树的高度
+ *  3.AVL树的旋转 右旋、左旋、先右旋后左旋、先左旋后右旋
+ *
+ * 关键信息 失衡节点，子节点（对于右旋来说是失衡节点的左节点），孙子节点(对于右旋是子节点的右节点)
+ *
+ *         5
+ *        / \
+ *       3   6                   3
+ *      / \          右旋5       / \
+ *     1   4                   1   5
+ *    /                       /   / \
+ *   0                       0   4   6
+ *
+ *
+ *         1
+ *        / \
+ *       0   4                     4
+ *          / \      左旋1         / \
+ *         3   5                 1   5
+ *              \               / \   \
+ *               6             0   3   6
+ *
+ *   先右旋后左旋
+ *
+ *         2                           2                             2
+ *        / \                         / \                           / \
+ *       1   3                       1   3                         1   4
+ *            \        右旋5               \       左旋3                / \
+ *             5                           4                          3   5
+ *            /                             \
+ *           4                               5
+ *
+ *   先左旋后右旋
+ *
+ *          4                          4                             4
+ *         / \                        / \                           / \
+ *        3   5                      3   5                         2   5
+ *       /             左转1         /              右转2          / \
+ *      1                          2                            1    3
+ *       \                        /
+ *        2                      1
+ *
+ *
+ *   旋转的选择：
+ *
  */
 public class TreeStruct {
     public static void main(String[] args) {
@@ -224,8 +272,68 @@ public class TreeStruct {
         }
     }
 
+    public static int height(Node node){
+        if(node != null){
+            return node.height;
+        }
+        return -1;
+    }
+
+    public static void updateHeight(Node node){
+        int lh = height(node.left);
+        int rh = height(node.right);
+        if(rh>lh){
+            node.height=rh+1;
+        }else{
+            node.height=lh+1;
+        }
+    }
+
+    /**
+     * 获取平衡因子
+     * @param node
+     * @return
+     */
+    public static int balanceFactor(Node node){
+        if(node==null){
+            return 0;
+        }
+        return height(node.left)-height(node.right);
+    }
+
+    /**
+     * 右旋
+     * @param node
+     * @return 返回右旋后子树的跟节点
+     */
+    public static Node rightRotate(Node node){
+        Node child = node.left;
+        Node grandChild = child.right;
+        child.right = node;
+        node.left = grandChild;
+        updateHeight(node);
+        updateHeight(child);
+        return child;
+    }
+
+    /**
+     *  左旋
+     * @param node
+     * @return
+     */
+    public static Node leftRotate(Node node){
+        Node child = node.right;
+        Node grandChild = child.left;
+        child.left = node;
+        node.right = grandChild;
+        updateHeight(child);
+        updateHeight(node);
+        return child;
+    }
+
     static class Node{
         int val;
+        int height;
         Node left;
         Node right;
 
