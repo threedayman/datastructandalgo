@@ -165,7 +165,7 @@ public class TreeStruct {
         }
 
     }
-    //前序遍历顺序 父节点 → 左节点 → 右节点
+    //前序遍历顺序 父节点 → 左子树 → 右子树
     public static void preOrder(Node node){
         if(node==null){
             return;
