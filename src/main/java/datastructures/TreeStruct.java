@@ -72,8 +72,23 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  *        2                      1
  *
  *
+ *           5               4                          2                  2
+ *          / \             / \                        / \                / \
+ *         3   6           3   5                      1   3              1   3
+ *       /                /                                \                  \
+ *      1                1                                  5                  5
+ *     /                  \                                /                    \
+ *    0                    2                              4                      6
+ *       右旋       先左旋（失衡节点的子节点）后右旋      先右旋(子)后左旋          左旋
+ *
+ *
  *   旋转的选择：
  *
+ *    失衡节点的平衡因子|子节点平衡因子|应采用旋转方法
+ *     >1(左偏树)          >=0         右旋
+ *     >1(左偏树)          <0          先左旋后右旋
+ *     <-1(右偏树）        <=0         左旋
+ *     <-1(右偏树）        》0         先右旋后左旋
  */
 public class TreeStruct {
     public static void main(String[] args) {
@@ -329,6 +344,87 @@ public class TreeStruct {
         updateHeight(child);
         updateHeight(node);
         return child;
+    }
+
+    public static Node rotate(Node root){
+        int factor = balanceFactor(root);
+        if(factor>1){
+            int lf = balanceFactor(root.left);
+            if(lf>=0){
+                rightRotate(root);
+            }else{
+                root.left = leftRotate(root.left);
+                return rightRotate(root);
+            }
+        }
+        if(factor<-1){
+            int rf = balanceFactor(root.right);
+            if(rf<=0){
+                return leftRotate(root);
+            }else {
+                root.right = rightRotate(root.right);
+                return leftRotate(root);
+            }
+        }
+        return root;
+    }
+
+
+    public static void insert(Node root,int val){
+        root = insertHelper(root,val);
+    }
+
+    public static Node insertHelper(Node node,int val){
+        if(node == null){
+            return new Node(val);
+        }
+        if(node.val<val){
+            node.right = insertHelper(node.right,val);
+        }else if(node.val>val){
+            node.left = insertHelper(node.left,val);
+        }else {
+            return node;
+        }
+
+        updateHeight(node);
+        return rotate(node);
+
+    }
+
+    public static void removeItem(Node root,int val){
+        root = removeHelper(root,val);
+    }
+
+    public static Node removeHelper(Node node, int val){
+        if(node == null){
+            return null;
+        }
+
+        if(node.val<val){
+            node.right = removeHelper(node.right,val);
+        }else if(node.val > val){
+            node.left = removeHelper(node.left,val);
+        }else{
+            if(node.left ==null || node.right == null){
+                Node child = node.left!=null?node.left:node.right;
+                if(child==null){
+                    return null;
+                }else{
+                    node =child;
+                }
+            }else {
+                Node tmp =  node.right;
+                while (tmp.left !=null){
+                    tmp=tmp.left;
+                }
+                node.right = removeHelper(node.right,tmp.val);
+                node.val= tmp.val;
+            }
+        }
+
+        updateHeight(node);
+        node = rotate(node);
+        return node;
     }
 
     static class Node{
