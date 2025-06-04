@@ -25,5 +25,7 @@ public class StackStruct {
         //取出栈顶元素 第二次
         System.out.println(s.peek());
 
+        System.out.println("stash");
+
     }
 }
